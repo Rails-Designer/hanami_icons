@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Add any icon library to a Hanami app"
   spec.description = "Add any icon library to a Hanami app, from Heroicons, to Lucide to Tabler (and others). Hanami Icons is library-agnostic, so you can add any library while using the same interface."
-  spec.homepage = "https://railsdesigner.com/open-source/hanami-icons/"
+  spec.homepage = "https://railsdesigner.com/open-source/hanami_icons/"
   spec.license = "MIT"
 
   spec.metadata["homepage_uri"] = spec.homepage
