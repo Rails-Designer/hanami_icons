@@ -27,6 +27,18 @@ class InitializerTest < Minitest::Test
     end
   end
 
+  def test_creates_the_provider_when_configuration_was_unset
+    Icons.configuration = nil
+
+    within_temp_dir do
+      create_hanami_app_files
+
+      Generate::Initializer.new.call(library: "heroicons")
+
+      assert_includes File.read("config/providers/icons.rb"), 'config.default_library = "heroicons"'
+    end
+  end
+
   def test_registers_a_provider_with_the_app
     within_temp_dir do
       create_hanami_app_files

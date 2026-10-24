@@ -34,4 +34,14 @@ class SyncTest < Minitest::Test
 
     assert_equal [["heroicons", [:solid, :outline]]], fake_sync.instantiations
   end
+
+  def test_initializes_configuration_when_unset
+    Icons.configuration = nil
+
+    stub_icons_sync(CliTestHelpers::FakeSync.new) do
+      Generate::Sync.new.call(library: "heroicons")
+    end
+
+    refute_nil Icons.configuration
+  end
 end

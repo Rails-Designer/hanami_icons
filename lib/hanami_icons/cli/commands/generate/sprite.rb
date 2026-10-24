@@ -20,6 +20,8 @@ module HanamiIcons
           # @api public
           # @since 0.1.0
           def call(output: "public/sprite.svg", **)
+            HanamiIcons.configuration
+
             fs.mkdir(File.dirname(output))
             fs.write(output, ::Icons::Sprite.new.svg)
 

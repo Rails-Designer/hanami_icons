@@ -24,6 +24,8 @@ module HanamiIcons
           # @api public
           # @since 0.1.0
           def call(library: nil, libraries: [], variants: nil, **)
+            HanamiIcons.configuration
+
             selected_libraries(library, libraries).each do |name|
               ::Icons::Sync.new(name, variants: variants&.map(&:to_sym)).now
             end
