@@ -10,7 +10,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 if [[ "$VERSION" =~ ^(major|minor|patch)$ ]]; then
-  CURRENT=$(grep -o '"[^"]*"' ./lib/icons/version.rb | tr -d '"')
+  CURRENT=$(grep -o '"[^"]*"' ./lib/hanami_icons/version.rb | tr -d '"')
   IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
 
   case $VERSION in
