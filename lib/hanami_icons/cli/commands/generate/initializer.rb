@@ -18,7 +18,7 @@ module HanamiIcons
           option :library, desc: "Choose a library"
           option :libraries, type: :array, default: [], desc: "Choose libraries"
           option :variants, type: :array, desc: "Only sync specific variants (e.g. solid outline)"
-          option :destination, type: :string, default: HanamiIcons.configuration.icons_path, desc: "Specify destination folder for icons"
+          option :destination, type: :string, desc: "Specify destination folder for icons"
 
           PROVIDER = "config/providers/icons.rb"
           HELPERS = "app/views/helpers.rb"
@@ -31,7 +31,9 @@ module HanamiIcons
           #
           # @api public
           # @since 0.1.0
-          def call(library: nil, libraries: [], variants: nil, destination: HanamiIcons.configuration.icons_path, **)
+          def call(library: nil, libraries: [], variants: nil, destination: nil, **)
+            destination ||= HanamiIcons.configuration.icons_path
+
             copy_provider
 
             insert_default_configuration(selected_libraries(library, libraries).first)

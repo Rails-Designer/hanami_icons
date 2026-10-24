@@ -27,16 +27,25 @@ module HanamiIcons
   class << self
     # @yield [config] Yields the Icons configuration
     # @yieldparam config [Icons::Configuration]
+    # @return [Icons::Configuration]
     #
     # @api public
     # @since 0.1.0
-    def configure(&block) = Icons.configure(&block)
+    def configure(&block)
+      Icons.configure(&block)
+
+      Icons.configuration
+    end
 
     # @return [Icons::Configuration]
     #
     # @api public
     # @since 0.1.0
-    def configuration = Icons.config
+    def configuration
+      Icons.configure {} unless Icons.configuration
+
+      Icons.configuration
+    end
 
     alias_method :config, :configuration
 
@@ -45,12 +54,16 @@ module HanamiIcons
     # @api public
     # @since 0.1.0
     def libraries = Icons.libraries
+
+    # @api private
+    # @since 0.1.0
+    def register_cli_commands!
+      Hanami::CLI.register "generate icons", CLI::Commands::Generate::Icons
+      Hanami::CLI.register "generate icons:initializer", CLI::Commands::Generate::Initializer
+      Hanami::CLI.register "generate icons:sync", CLI::Commands::Generate::Sync
+      Hanami::CLI.register "generate icons:sprite", CLI::Commands::Generate::Sprite
+    end
   end
 
-  if Hanami::CLI.within_hanami_app?
-    Hanami::CLI.register "generate icons", CLI::Commands::Generate::Icons
-    Hanami::CLI.register "generate icons:initializer", CLI::Commands::Generate::Initializer
-    Hanami::CLI.register "generate icons:sync", CLI::Commands::Generate::Sync
-    Hanami::CLI.register "generate icons:sprite", CLI::Commands::Generate::Sprite
-  end
+  register_cli_commands! if Hanami::CLI.within_hanami_app?
 end

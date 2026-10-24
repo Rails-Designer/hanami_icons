@@ -1,6 +1,6 @@
 # Hanami Icons
 
-Add any icon library to a Hanami app. Hanami Icons has first-party support for a [handful of libraries](#first-party-libraries). It is library agnostic so it can be used with any icon library using the same interface. Hanami Icons is a Hanami gem for the [Icons Ruby gem](https://github.com/Rails-Designer/icons).
+Add any icon library to a Hanami app. Hanami Icons has first-party support for [several libraries](#first-party-libraries) and one interface for all of them. It is a Hanami wrapper for the [Icons Ruby gem](https://github.com/Rails-Designer/icons).
 
 ```erb
 # Using the default icon library
@@ -10,68 +10,72 @@ Add any icon library to a Hanami app. Hanami Icons has first-party support for a
 <%== icon "apple", library: "simple_icons", class: "text-black" %>
 ```
 
-The icons are sourced directly from their respective GitHub repositories via the [Icons](https://github.com/Rails-Designer/icons) gem, ensuring Hanami Icons remain lightweight.
+The [Icons](https://github.com/Rails-Designer/icons) gem reads icons from their source repositories, so Hanami Icons stays small.
 
 **Sponsored By [Rails Designer](https://railsdesigner.com/)**
 
 ## Install
 
-Add the gem:
+Hanami loads CLI extensions from the `:cli` Bundler group. The view helpers also need the gem at runtime. Add the gem to both groups:
 
-```bash
-bundle add hanami_icons
+```ruby
+gem "hanami_icons", group: [:default, :cli]
 ```
 
-Install, choosing one of the supported libraries:
+Then run:
+
+```bash
+bundle install
+```
+
+Generate the provider and sync a library:
 
 ```bash
 hanami generate icons --library=heroicons
 ```
 
-**Example**
+More examples:
 
 ```bash
-hanami generate icons --library=heroicons
-
-# Or multiple at once
+# Multiple libraries
 hanami generate icons --libraries=heroicons lucide
 
-# Or only specific variants
+# Selected variants only
 hanami generate icons --library=heroicons --variants solid outline
 ```
 
-This creates `config/providers/icons.rb`, registers the provider with the app container and adds the view helpers into `app/views/helpers.rb`.
+The command creates `config/providers/icons.rb`, registers the `icons` provider, and adds the helpers to `app/views/helpers.rb`.
 
 ## Usage
 
 ```ruby
-# Uses the default library and variant defined in config/providers/icons.rb
+# Default library and variant from config/providers/icons.rb
 icon "check"
 
-# Use another variant
+# Another variant
 icon "check", variant: "solid"
 
-# Set library explicitly
+# Explicit library
 icon "check", library: "heroicons"
 
-# Add CSS
+# CSS class
 icon "check", class: "text-green-500"
 
-# Add data attributes
+# Data attributes
 icon "check", data: { controller: "swap" }
 
-# Set the stroke-width
+# Stroke width
 icon "check", stroke_width: 2
 
-# Base64-encoded data URI
+# Base64 data URI
 encoded_icon "check"
 ```
 
-The helpers return `Hanami::View::HTML::SafeString`, so they are safe to output in templates (`<%== … %>` or `&= …`).
+The helpers return `Hanami::View::HTML::SafeString`. Use `<%== %>` in ERB or `==` in Slim.
 
 ## Sprites
 
-Hanami Icons supports SVG sprites for improved performance. Instead of inlining each icon's full SVG, sprite icons reference a shared set of `<symbol>` definitions via `<use href="…">`.
+A sprite references shared `<symbol>` definitions with `<use href="…">`. Use a sprite when a page shows many icons.
 
 ### Configuration
 
@@ -81,13 +85,13 @@ HanamiIcons.configure do |config|
   config.default_library = "heroicons"
   config.default_variant = "outline"
 
-  # Where `sprite_icon` references symbols. Set to nil to use inline mode (`<%== icons_sprite %>` in layout).
+  # URL for `sprite_icon`. Set to nil for an inline sprite.
   config.default_sprite_location = "/sprite.svg"
 
-  # Set to true to validate that referenced icons exist on disk
+  # Check that referenced icons exist on disk.
   config.validate_sprite_icons = false
 
-  # Define which icons to include in the sprite
+  # Icons to include in the sprite.
   config.sprite = {
     heroicons: {
       outline: %w[check chevron-down menu search x],
@@ -99,24 +103,26 @@ end
 
 ### External sprite
 
-Generate a static sprite file and reference it with `sprite_icon`:
+Generate a sprite file:
 
 ```bash
 hanami generate icons:sprite
 ```
 
+Then reference it:
+
 ```erb
 <%== sprite_icon "check" %>
-<%# renders: <svg><use href="/sprite.svg#heroicons_outline_check"></use></svg> %>
+<%# => <svg><use href="/sprite.svg#heroicons_outline_check"></use></svg> %>
 ```
 
-Point at a precompiled file or a CDN by changing the location:
+Use a CDN or a different file:
 
 ```ruby
 config.default_sprite_location = "https://cdn.example.com/sprite_icons.svg"
 ```
 
-Override per icon:
+Override the location for one icon:
 
 ```erb
 <%== sprite_icon "check", sprite_location: "/assets/sprites.svg" %>
@@ -124,7 +130,7 @@ Override per icon:
 
 ### Inline sprite
 
-Set the location to `nil` and embed the sprite directly in your layout:
+Set the location to `nil` and embed the sprite in your layout:
 
 ```ruby
 config.default_sprite_location = nil
@@ -140,7 +146,7 @@ config.default_sprite_location = nil
 </body>
 ```
 
-You can also generate a sprite for a specific set of icons:
+Build a sprite for selected icons:
 
 ```erb
 <%== icons_sprite ["check", "search"], library: "heroicons", variant: "outline" %>
@@ -148,46 +154,53 @@ You can also generate a sprite for a specific set of icons:
 
 ## Sync icons
 
-To sync all libraries, run:
+Sync every first-party library:
 
 ```bash
 hanami generate icons:sync
 ```
 
-To sync only a specific library, run:
+Sync one library:
 
 ```bash
 hanami generate icons:sync --library=heroicons
+```
 
-# Or multiple at once:
+Sync several libraries:
+
+```bash
 hanami generate icons:sync --libraries=heroicons lucide
 ```
 
-To sync only specific variants for a library:
+Sync selected variants:
 
 ```bash
 hanami generate icons:sync --library=heroicons --variants solid outline
 ```
 
+The `icons:sync` command runs before the app boots, so it does not load `config/providers/icons.rb`. It sees first-party libraries only.
+
 ## Custom icon libraries
 
-Hanami Icons pulls SVGs straight from the path `<icons_path>/<library_name>/<name>.svg`. No generator is required for custom icons. Configuration is optional and only used to define defaults.
+Hanami Icons reads SVGs from `<icons_path>/<library>/<name>.svg`. Libraries with variants add a variant directory, such as `<icons_path>/heroicons/outline/check.svg`.
 
-To add a custom library, create its directory and drop in your SVGs:
+Local libraries need no configuration. Create the directory and add SVGs:
 
 ```
 app/assets/svg/icons/simple_icons/apple.svg
 ```
 
-(alternatively, scaffold it with `hanami generate icons --library=simple_icons`, which creates the directory and adds `config.custom_library :simple_icons` in the provider.)
-
-Use them like any other library:
+Then use the library:
 
 ```ruby
 icon "apple", library: "simple_icons"
 ```
 
-To add a git source for syncing, edit the provider:
+To scaffold a custom library, run `hanami generate icons --library=simple_icons`. The command creates the directory and adds `config.custom_library :simple_icons` to the provider.
+
+### Git-sourced libraries
+
+Add the source to the provider:
 
 ```ruby
 HanamiIcons.configure do |config|
@@ -198,11 +211,13 @@ HanamiIcons.configure do |config|
 end
 ```
 
-Then sync:
+`icons:sync` cannot see this library because it does not load providers. Sync it in the app context:
 
 ```bash
-hanami generate icons:sync --library=my_icons
+bundle exec hanami run 'Icons::Sync.new(:my_icons).now'
 ```
+
+You can also run the same call in `hanami console`.
 
 ## First-party libraries
 
@@ -221,7 +236,7 @@ hanami generate icons:sync --library=my_icons
 
 ## Contributing
 
-This project uses [Standard](https://github.com/testdouble/standard) for formatting Ruby code. Please make sure to run `bundle exec standardrb` before submitting pull requests. Run tests via `bundle exec rake`.
+This project uses [Standard](https://github.com/testdouble/standard) for Ruby formatting. Run `bundle exec standardrb` before you open a pull request. Run the tests with `bundle exec rake`.
 
 ## License
 
